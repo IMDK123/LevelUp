@@ -1,0 +1,21 @@
+{
+  "name": "LEVELUP",
+  "short_name": "LevelUp",
+  "description": "LevelUp: Daily Rise - Complete routines, daily quests, and rise from F to HIM!",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#070b18",
+  "theme_color": "#3cc9ff",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
