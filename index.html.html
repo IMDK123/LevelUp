@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LEVELUP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+ --card:#111a33;
+ --blue:#3cc9ff;
+ --purple:#a855f7;
+ --accent:#7cf3ff;
+ --text:#e8f6ff;
+ --muted:#7a8fb3;
+}
+
+*{box-sizing:border-box}
+
+body{
+ margin:0;
+ min-height:100vh;
+ background:linear-gradient(180deg,#070b18,#0b1020);
+ color:var(--text);
+ font-family:'Rajdhani',sans-serif;
+}
+
+header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:14px 20px;
+ border-bottom:1px solid #1f2d55;
+ background:#070b18;
+ position:sticky;
+ top:0;
+ z-index:10;
+}
+
+.logo{
+ font-family:'Orbitron',sans-serif;
+ font-weight:800;
+ font-size:22px;
+ color:var(--blue);
+ text-shadow:0 0 10px rgba(60,201,255,.8);
+}
+.logo .up{
+ color:var(--purple);
+ text-shadow:0 0 10px rgba(168,85,247,.8);
+}
+
+.user-btn{
+ cursor:pointer;
+ text-align:right;
+}
+.username-display{font-weight:600;font-size:14px}
+.title-display{font-size:12px;color:var(--muted)}
+
+.container{padding:15px;display:none}
+.container.active{display:block}
+
+.card{
+ background:var(--card);
+ border:1px solid #1f2d55;
+ border-radius:14px;
+ padding:15px;
+ margin-bottom:15px;
+}
+
+h2{
+ font-family:'Orbitron',sans-serif;
+ font-size:14px;
+ color:var(--accent);
+ margin:0 0 10px;
+}
+
+.rank-letter{
+ font-family:'Orbitron',sans-serif;
+ font-size:46px;
+ font-weight:800;
+}
+
+.stats{
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ gap:10px;
+ margin-top:10px;
+}
+
+.stat{
+ background:#0d1530;
+ border-radius:10px;
+ padding:8px;
+ text-align:center;
+}
+.stat b{display:block;color:var(--blue)}
+
+.progress{
+ height:8px;
+ background:#0a122b;
+ border-radius:20px;
+ overflow:hidden;
+ margin-top:6px;
+}
+.progress span{
+ display:block;
+ height:100%;
+ background:linear-gradient(90deg,var(--blue),var(--accent));
+}
+
+.quest{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ background:#0d1530;
+ padding:10px;
+ border-radius:10px;
+ margin-bottom:8px;
+}
+
+button{
+ border:1px solid var(--blue);
+ background:none;
+ color:var(--blue);
+ padding:5px 10px;
+ border-radius:8px;
+ cursor:pointer;
+}
+
+.delete{
+ border-color:#ff4d4d;
+ color:#ff4d4d;
+}
+
+input{
+ width:100%;
+ margin-bottom:8px;
+ background:#0d1530;
+ border:1px solid #1f2d55;
+ color:white;
+ padding:8px;
+ border-radius:8px;
+}
+
+/* RANK UP OVERLAY */
+#rankUpOverlay{
+ position:fixed;
+ inset:0;
+ background:rgba(5,8,20,.95);
+ display:none;
+ align-items:center;
+ justify-content:center;
+ z-index:9999;
+}
+.rank-up-box{text-align:center;animation:zoomIn .4s ease-out}
+.rank-up-text{
+ font-family:'Orbitron',sans-serif;
+ letter-spacing:3px;
+ font-size:22px;
+ color:var(--blue);
+}
+.rank-up-rank{
+ font-family:'Orbitron',sans-serif;
+ font-size:90px;
+ font-weight:900;
+ color:var(--purple);
+ text-shadow:0 0 30px rgba(168,85,247,1);
+ animation:pulse 1.2s infinite;
+}
+
+@keyframes zoomIn{
+ from{transform:scale(.5);opacity:0}
+ to{transform:scale(1);opacity:1}
+}
+@keyframes pulse{
+ 0%,100%{text-shadow:0 0 20px rgba(168,85,247,.8)}
+ 50%{text-shadow:0 0 50px rgba(168,85,247,1)}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">LEVEL<span class="up">UP</span></div>
+ <div class="user-btn" onclick="openPage('profile')">
+  <span class="username-display" id="usernameTop"></span>
+  <span class="title-display" id="titleTop"></span>
+ </div>
+</header>
+
+<!-- HOME -->
+<div id="home" class="container active">
+ <div class="card">
+  <h2>STATUS WINDOW</h2>
+  <div class="rank-letter" id="rank"></div>
+  <div class="stats">
+   <div class="stat">Total XP<b id="totalXP"></b></div>
+   <div class="stat">Habits<b id="habitsDone"></b></div>
+   <div class="stat">Streak<b id="streak"></b></div>
+   <div class="stat">Progress<b id="rankPercent"></b></div>
+  </div>
+  <div class="progress"><span id="rankBar"></span></div>
+ </div>
+
+ <!-- ROUTINES -->
+ <div class="card">
+  <h2>ROUTINES</h2>
+  <div id="routineList"></div>
+ </div>
+
+ <!-- DAILY QUESTS -->
+ <div class="card">
+  <h2>DAILY QUESTS</h2>
+  <div id="questList"></div>
+  <button onclick="openPage('routine')">Add Routine</button>
+ </div>
+</div>
+
+<!-- ROUTINE -->
+<div id="routine" class="container">
+ <div class="card">
+  <h2>ADD ROUTINE</h2>
+  <input id="routineName" placeholder="Routine name">
+  <input id="routineXP" type="number" placeholder="XP reward (max 50)">
+  <button onclick="addRoutine()">Add</button>
+  <button onclick="openPage('home')">Back</button>
+ </div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="container">
+ <div class="card">
+  <h2>PROFILE</h2>
+  <input id="usernameInput" placeholder="Username">
+  <input id="titleInput" placeholder="Title">
+  <button onclick="saveProfile()">Save</button>
+  <p>Rank: <b id="profileRank"></b></p>
+  <p>Total XP: <b id="profileXP"></b></p>
+  <p>Habits Done: <b id="profileHabits"></b></p>
+  <p>Member Since: <b id="memberSince"></b></p>
+ </div>
+
+ <div class="card">
+  <h2>RANK PROGRESSION</h2>
+  <div id="rankProgression"></div>
+ </div>
+
+ <!-- ROUTINE HISTORY -->
+ <div class="card">
+  <h2>ROUTINE HISTORY</h2>
+  <div id="routineHistory"></div>
+ </div>
+
+ <button onclick="openPage('home')">Back</button>
+</div>
+
+<!-- RANK UP -->
+<div id="rankUpOverlay">
+ <div class="rank-up-box">
+  <div class="rank-up-text">ASCENDED</div>
+  <div class="rank-up-rank" id="rankUpRank"></div>
+ </div>
+</div>
+
+<script>
+/* ===== CORE DATA ===== */
+const ranks=[
+ {n:"F",min:0,max:100},
+ {n:"E",min:100,max:500},
+ {n:"D",min:500,max:1000},
+ {n:"C",min:1000,max:5000},
+ {n:"B",min:5000,max:15000},
+ {n:"A",min:15000,max:30000},
+ {n:"S",min:30000,max:50000},
+ {n:"National",min:50000,max:100000},
+ {n:"Monarch",min:100000,max:300000},
+ {n:"HIM",min:300000,max:Infinity}
+];
+
+let data=JSON.parse(localStorage.getItem("levelup"))||{
+ username:"Hunter",
+ title:"Awakened One",
+ xp:0,habits:0,streak:0,
+ joined:new Date().toDateString(),
+ routines:[]
+};
+
+function save(){localStorage.setItem("levelup",JSON.stringify(data))}
+
+function getRank(){
+ return ranks.find(r=>data.xp>=r.min && data.xp<r.max) || ranks[0];
+}
+
+let lastRank=getRank().n;
+
+/* ===== NAV ===== */
+function openPage(p){
+ document.querySelectorAll(".container").forEach(c=>c.classList.remove("active"));
+ document.getElementById(p).classList.add("active");
+ render();
+}
+
+/* ===== DAILY QUESTS ===== */
+const dailyTasks=[
+ {name:"Drink Water 💧",xp:25},
+ {name:"Stretch 🧘‍♂️",xp:30},
+ {name:"Read 📖",xp:35},
+ {name:"Walk 🚶‍♂️",xp:40},
+ {name:"Meditate 🕊️",xp:30},
+ {name:"Exercise 💪",xp:50},
+ {name:"Clean 🧹",xp:25},
+ {name:"Plan Day 📅",xp:30}
+];
+
+function getDaily(){
+ const today=new Date().toDateString();
+ let d=JSON.parse(localStorage.getItem("levelupDaily"))||{};
+ if(d.date!==today){
+  d={date:today,quests:[...dailyTasks],done:Array(8).fill(false)};
+  localStorage.setItem("levelupDaily",JSON.stringify(d));
+ }
+ return d;
+}
+
+function renderDaily(){
+ const q=document.getElementById("questList");
+ q.innerHTML="";
+ const d=getDaily();
+ let gained=0,total=0;
+
+ d.quests.forEach((r,i)=>{
+  total+=r.xp;
+  if(d.done[i]) gained+=r.xp;
+  q.innerHTML+=`
+   <div class="quest">
+    ${r.name} (+${r.xp})
+    <button ${d.done[i]?"disabled":""} onclick="completeDaily(${i})">
+     ${d.done[i]?"✔ Done":"Done"}
+    </button>
+   </div>`;
+ });
+
+ const pct=Math.floor((gained/total)*100);
+ q.innerHTML+=`<div class="progress"><span style="width:${pct}%"></span></div>
+ <div style="text-align:center">Daily Progress: ${pct}%</div>`;
+}
+
+function completeDaily(i){
+ const d=getDaily();
+ if(d.done[i])return;
+ d.done[i]=true;
+ data.xp+=d.quests[i].xp;
+ data.habits++;data.streak++;
+ save();localStorage.setItem("levelupDaily",JSON.stringify(d));
+ render();
+}
+
+/* ===== ROUTINES ===== */
+function addRoutine(){
+ const n=routineName.value;
+ let x=+routineXP.value;
+ if(!n||!x)return;
+ if(x>50)x=50;
+ data.routines.push({name:n,xp:x,done:false});
+ save();openPage("home");
+}
+
+/* ===== RENDER ROUTINES ===== */
+function renderRoutines(){
+ const list = document.getElementById("routineList");
+ list.innerHTML = "";
+ const activeRoutines = data.routines.filter(r => !r.done);
+ if(activeRoutines.length === 0){
+   list.innerHTML = "<p style='color:var(--muted)'>No routines yet</p>";
+   return;
+ }
+ activeRoutines.slice().reverse().forEach((r,i)=>{
+   const index = data.routines.indexOf(r);
+   list.innerHTML += `
+     <div class="quest">
+       ${r.name} (+${r.xp} XP)
+       <button ${r.done?"disabled":""} onclick="completeRoutine(${index})">
+         ${r.done?"✔ Done":"Done"}
+       </button>
+     </div>`;
+ });
+}
+
+/* ===== COMPLETE ROUTINE ===== */
+function completeRoutine(index){
+ if(data.routines[index].done) return;
+ data.routines[index].done = true;
+ data.xp += data.routines[index].xp;
+ data.habits++; data.streak++;
+ save();
+ render();
+}
+
+/* ===== ROUTINE HISTORY ===== */
+function renderRoutineHistory(){
+ const hist = document.getElementById("routineHistory");
+ hist.innerHTML = "";
+ const doneRoutines = data.routines.filter(r => r.done);
+ if(doneRoutines.length === 0){
+   hist.innerHTML = "<p style='color:var(--muted)'>No routines completed yet</p>";
+   return;
+ }
+ doneRoutines.slice().reverse().forEach(r=>{
+   hist.innerHTML += `<div class="quest">${r.name} (+${r.xp} XP)</div>`;
+ });
+}
+
+/* ===== PROFILE ===== */
+function saveProfile(){
+ if(usernameInput.value)data.username=usernameInput.value;
+ if(titleInput.value)data.title=titleInput.value;
+ save();render();
+}
+
+/* ===== RENDER ===== */
+function render(){
+ const r=getRank();
+ const pct=Math.min(((data.xp-r.min)/(r.max-r.min))*100,100);
+
+ usernameTop.textContent=data.username;
+ titleTop.textContent=data.title;
+ rank.textContent=r.n;
+ totalXP.textContent=data.xp;
+ habitsDone.textContent=data.habits;
+ streak.textContent=data.streak;
+ rankPercent.textContent=Math.floor(pct)+"%";
+ rankBar.style.width=pct+"%";
+
+ if(r.n!==lastRank){showRankUp(r.n);lastRank=r.n;}
+
+ profileRank.textContent=r.n;
+ profileXP.textContent=data.xp;
+ profileHabits.textContent=data.habits;
+ memberSince.textContent=data.joined;
+
+ rankProgression.innerHTML="";
+ ranks.forEach(x=>{
+  let w=0;
+  if(data.xp>=x.max)w=100;
+  else if(data.xp>=x.min)w=((data.xp-x.min)/(x.max-x.min))*100;
+  rankProgression.innerHTML+=`
+   <div>${x.n}</div>
+   <div class="progress"><span style="width:${w}%"></span></div>`;
+ });
+
+ renderRoutines();      // active routines
+ renderDaily();         // daily quests
+ renderRoutineHistory();// completed routines in profile
+}
+
+function showRankUp(n){
+ rankUpRank.textContent=n;
+ rankUpOverlay.style.display="flex";
+ setTimeout(()=>rankUpOverlay.style.display="none",2000);
+}
+
+render();
+</script>
+</body>
+</html>
